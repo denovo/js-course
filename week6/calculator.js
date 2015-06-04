@@ -1,75 +1,70 @@
 // create a calculator which depends on the MATH module, referred to inside the function as "calc"
 var myCalculator = (function (calc) {
-
+  "use strict";
     var
       calcOperatorFlag = null,
       calcWrap = document.querySelectorAll(".calc")[0],
       view = document.querySelectorAll(".calc-view .form-control")[0],
-      isChained = false; // used to tell if more than one operation has been added to the calculator before pressing =
+      isChained = false, // used to tell if more than one operation has been added to the calculator before pressing =
 
       whichButtonType = function(event) {
-        var btnClicked = event.target, // the button that was clicked
+        var btnClicked = event.target,
+            btnType = btnClicked.getAttribute('data-type'), // the data-type of the button that was clicked
             existingData = view.value, // value of the view before the button was clicked
             // actionType = btnClicked.getAttribute('data-type'); // digit, add, sub, total, clear etc
             buttonTypes = {
-              digit: function(){ console.log(this.name); },
-              sub: function(){ console.log(this.name); },
-              add: function(){ console.log(this.name); },
-              divide: function(){ console.log(this.name); },
-              multiply: function(){ console.log(this.name); },
-              clear: function(){ console.log(this.name); },
-              result: function(){ console.log(this.name); },
+              digit: function() { digitFunc(); },
+              sub: function(){ subFunc(); },
+              add: function(){ addFunc(); },
+              divide: function(){ divideFunc(); },
+              multiply: function(){ multiplyFunc(); },
+              clear: function(){ clearFunc(); },
+              result: function(){ resultFunc(); },
             },
 
-            buttonTypes[btnClicked.getAttribute('data-type')](),
+            digitFunc = function () {
+              view.value = existingData + btnClicked.getAttribute('data-value');
+            },
+            subFunc = function () {
+              calcOperatorFlag = "sub";
+              updateTotal();
+            },
+            addFunc = function () {
+              calcOperatorFlag = "add";
+              updateTotal();
+            },
+            divideFunc = function () {
+              calcOperatorFlag = "divide";
+              updateTotal();
+            },
+            multiplyFunc = function () {
+              calcOperatorFlag = "multiply";
+              updateTotal();
+            },
+            clearFunc = function () {
+              view.value = "";
+              calc.total = 0;
+              isChained = false;
+            },
+            resultFunc = function () {
+              calc.total = doCalcOperation(calcOperatorFlag);
+              view.value = calc.total;
+              isChained = false;
+              console.log ("the total is: " + calc.total);
+            },
 
-        // switch (btnClicked.getAttribute('data-type')) {
-        //   case 'digit':
-        //     view.value = existingData + btnClicked.getAttribute('data-value');
-        //     break;
-        //   case 'add':
-        //     calcOperatorFlag = "add";
-        //     updateSubTotal();
-        //     calc.set(parseInt(view.value));
-        //     view.value = "";
-        //     isChained = true;
-        //     break;
-        //   case 'sub':
-        //     calcOperatorFlag = "sub";
-        //     updateSubTotal();
-        //     calc.set(parseInt(view.value));
-        //     view.value = "";
-        //     isChained = true;
-        //     break;
-        //   case 'multiply':
-        //     calcOperatorFlag = "multiply";
-        //     updateSubTotal();
-        //     calc.set(parseInt(view.value));
-        //     view.value = "";
-        //     isChained = true;
-        //     break;
-        //   case 'divide':
-        //     calcOperatorFlag = "divide";
-        //     updateSubTotal();
-        //     calc.set(parseInt(view.value));
-        //     view.value = "";
-        //     isChained = true;
-        //     break;
-        //   case 'clear':
-        //     view.value = "";
-        //     calc.total = 0;
-        //     isChained = false;
-        //     break;
-        //   case 'result':
-        //     isChained = false;
-        //     calc.total = doCalcOperation(calcOperatorFlag);
-        //     // console.log("the calcOperatorFlag is: " + calcOperatorFlag);
-        //     view.value = calc.total;
-        //     console.log ("the total is: " + calc.total);
-        //     break;
-        // }
-        // console.log(calc.total);
+            updateTotal = function () {
+              updateSubTotal();
+              calc.set(parseInt(view.value));
+              view.value = "";
+              isChained = true;
+            };
+
+            // use the data-type of the button clicked to know which function to invoke
+            buttonTypes[btnType]();
       },
+
+
       updateSubTotal = function() {
         if (isChained) {
           calc.total = doCalcOperation(calcOperatorFlag);
@@ -87,33 +82,12 @@ var myCalculator = (function (calc) {
           divide : function() { calc.divide(val); },
         };
         calcOperations[state]();
-        // console.log("trying to do something with : " + val);
         view.value = calc.total;
-        // console.log("the total is:" + calc.total);
         return calc.total;
-
-
-
-
-        // switch (state) {
-        //   case 'add':
-        //     calc.add(val);
-        //     break;
-        //   case 'sub':
-        //     calc.sub(val);
-        //     break;
-        //   case 'multiply':
-        //     calc.mulitply(val);
-        //     break;
-        //   case 'divide':
-        //     calc.divide(val);
-        //     break;
-        // }
-
       },
 
       init = function () {
-        // add click handler to the calculator
+        // sets up click handler for the calculator buttons
         calcWrap.addEventListener("click", whichButtonType);
       };
 
